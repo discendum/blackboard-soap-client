@@ -28,10 +28,43 @@ namespace Pulsestorm\Blackboard\Soap;
 use Pulsestorm\Blackboard\Soap\Legacy\Bbphp;
 class Resource extends Bbphp
 {
+        private $curl_options;
 	public function __construct($url = null, $use_curl = true) {
 		$this->url = $url;
 		$this->use_curl = $use_curl;
 		// $this->session_id = $this->Context("initialize");
+	}
+        
+        public function doCall($method = null, $service = "Context", $args = null) {
+		
+		$request = $this->buildRequest($method, $service, $args);
+        $this->log($request);
+        
+		if ($this->use_curl) {
+			$ch = curl_init();
+				
+			curl_setopt($ch, CURLOPT_URL, $this->url . '/webapps/ws/services/' . $service . '.WS');
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml; charset=utf-8', 'SOAPAction: "' . $method . '"'));
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        
+                        if (is_array($this->curl_options) && count($this->curl_options) > 0) {
+                            curl_setopt_array($ch, $this->curl_options);
+                        }
+			
+			$result = curl_exec($ch);
+			curl_close($ch);	
+		} else {
+			$result = $this->doPostRequest($this->url . '/webapps/ws/services/' . $service . '.WS', $request, "Content-type: text/xml; charset=utf-8\nSOAPAction: \"" . $method . "\"");
+		}
+
+        $this->log($result);
+
+		$result_array = $this->xmlstr_to_array($result);
+
+		$final_result = (isset($result_array['Body'][$method . 'Response']['return'])) ? $result_array['Body'][$method . 'Response']['return'] : null;
+		return $final_result;
 	}
 	
 	public function setSessionId($session_id)
@@ -39,4 +72,7 @@ class Resource extends Bbphp
 	    $this->session_id = $session_id;
 	    return $this;
 	}
+        public function setCurlOptions($options) {
+            $this->curl_options = $options;
+        }
 }

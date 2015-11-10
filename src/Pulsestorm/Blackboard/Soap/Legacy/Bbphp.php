@@ -48,7 +48,7 @@ class Bbphp {
 	    return $this;
 	}
 	
-	private function buildHeader() {
+	protected function buildHeader() {
 		$stamp = gmdate("Y-m-d\TH:i:s\Z");
 		
 		if ($this->session_id == null) {
@@ -78,7 +78,7 @@ END;
 		return $header;
 	}
 	
-	private function buildRequest($method = null, $service, $args = null) {
+	protected function buildRequest($method = null, $service, $args = null) {
 		$header = $this->buildHeader();
 		
         $class = 'Pulsestorm\Blackboard\Soap\Legacy\\' . $service;
@@ -122,7 +122,7 @@ END;
 			curl_setopt($ch, CURLOPT_POST, 1);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			
+
 			$result = curl_exec($ch);
 			curl_close($ch);	
 		} else {
@@ -141,7 +141,7 @@ END;
 	 * This function can be found here:
 	 * http://wezfurlong.org/blog/2006/nov/http-post-from-php-without-curl/
 	 */
-	private function doPostRequest($url, $data, $optional_headers = null) {
+	protected function doPostRequest($url, $data, $optional_headers = null) {
 		$params = array('http' => array(
 		            'method' => 'POST',
 		            'content' => $data

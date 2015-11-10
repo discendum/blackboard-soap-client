@@ -82,6 +82,11 @@ class Client
     {
         return new Util($this->resource);
     }
+
+    public function setCurlOptions($options) {
+        $this->resource->setCurlOptions($options);
+        return $this;
+    }
 }
 
 
